@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import guru.springframework.springaiintro.model.Answer;
-import guru.springframework.springaiintro.model.GetCapitalRequest;
-import guru.springframework.springaiintro.model.GetCapitalResponse;
-import guru.springframework.springaiintro.model.Question;
+import guru.springframework.springaiintro.model.*;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -66,14 +63,14 @@ public class OllamaServiceImpl implements OllamaService {
     }
 
     @Override
-    public Answer getCapitalWithInfo(GetCapitalRequest getCapitalRequest) {
-        PromptTemplate promptTemplate = new PromptTemplate(getCapitalPromptWithPrompt);
-        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
-        String answer = this.ollamaChatClient
-                .prompt(prompt)
-                .call()
-                .content();
-
-        return new Answer(answer);
+    public GetCapitalWithInfoResponse getCapitalWithInfo(GetCapitalRequest getCapitalRequest) {
+        BeanOutputConverter<GetCapitalWithInfoResponse> converter = new BeanOutputConverter<>(GetCapitalWithInfoResponse.class);
+        String format = converter.getFormat();
+        System.out.println(format);
+        PromptTemplate promptTemplate = new PromptTemplate(getCapitalPrompt);
+        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry(), "format", format));
+        String answer = this.ollamaChatClient.prompt(prompt).call().content();
+        System.out.println(answer);
+        return converter.convert(Objects.requireNonNull(answer));
     }
 }
