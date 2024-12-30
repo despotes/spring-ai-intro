@@ -1,6 +1,7 @@
 package guru.springframework.springaiintro.controllers;
 
 import guru.springframework.springaiintro.model.Answer;
+import guru.springframework.springaiintro.model.GetCapitalRequest;
 import guru.springframework.springaiintro.model.Question;
 import guru.springframework.springaiintro.services.OllamaService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,11 @@ public class QuestionController {
 
     public QuestionController(OllamaService ollamaService) {
         this.ollamaService = ollamaService;
+    }
+
+    @PostMapping("/capital")
+    public Answer getCapital(@RequestBody GetCapitalRequest getCapitalRequest) {
+        return ollamaService.getAnswer(getCapitalRequest);
     }
 
     @PostMapping("/ask")
