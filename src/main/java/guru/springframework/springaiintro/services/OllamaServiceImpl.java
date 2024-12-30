@@ -18,6 +18,9 @@ public class OllamaServiceImpl implements OllamaService {
     @Value("classpath:templates/get-capital-prompt.st")
     private Resource getCapitalPrompt;
 
+    @Value("classpath:templates/get-capital-prompt-with-info.st")
+    private Resource getCapitalPromptWithPrompt;
+
     private final ChatClient ollamaChatClient;
 
     public OllamaServiceImpl(ChatClient ollamaChatClient) {
@@ -46,6 +49,18 @@ public class OllamaServiceImpl implements OllamaService {
     public Answer getAnswer(GetCapitalRequest getCapitalRequest) {
         //PromptTemplate promptTemplate = new PromptTemplate("What is the capital of {stateOrCountry} ?");
         PromptTemplate promptTemplate = new PromptTemplate(getCapitalPrompt);
+        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
+        String answer = this.ollamaChatClient
+                .prompt(prompt)
+                .call()
+                .content();
+
+        return new Answer(answer);
+    }
+
+    @Override
+    public Answer getCapitalWithInfo(GetCapitalRequest getCapitalRequest) {
+        PromptTemplate promptTemplate = new PromptTemplate(getCapitalPromptWithPrompt);
         Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
         String answer = this.ollamaChatClient
                 .prompt(prompt)

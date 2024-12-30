@@ -9,4 +9,6 @@ public interface OllamaService {
     Answer getAnswer(Question question);
 
     Answer getAnswer(GetCapitalRequest getCapitalRequest);
+
+    Answer getCapitalWithInfo(GetCapitalRequest getCapitalRequest);
 }
