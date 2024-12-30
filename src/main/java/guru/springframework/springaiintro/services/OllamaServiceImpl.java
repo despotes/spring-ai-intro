@@ -6,16 +6,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.springaiintro.model.Answer;
 import guru.springframework.springaiintro.model.GetCapitalRequest;
+import guru.springframework.springaiintro.model.GetCapitalResponse;
 import guru.springframework.springaiintro.model.Question;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class OllamaServiceImpl implements OllamaService {
@@ -54,26 +57,12 @@ public class OllamaServiceImpl implements OllamaService {
     }
 
     @Override
-    public Answer getAnswer(GetCapitalRequest getCapitalRequest) {
-        //PromptTemplate promptTemplate = new PromptTemplate("What is the capital of {stateOrCountry} ?");
+    public GetCapitalResponse getAnswer(GetCapitalRequest getCapitalRequest) {
+        BeanOutputConverter<GetCapitalResponse> converter = new BeanOutputConverter<>(GetCapitalResponse.class);
+        String format = converter.getFormat();
         PromptTemplate promptTemplate = new PromptTemplate(getCapitalPrompt);
-        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
-        String answer = this.ollamaChatClient
-                .prompt(prompt)
-                .call()
-                .content();
-
-        System.out.println(answer);
-
-        String responseString;
-        try {
-            JsonNode jsonNode = objectMapper.readTree(answer);
-            responseString = jsonNode.get("answer").asText();
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        return new Answer(responseString);
+        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry(), "format", format));
+        return converter.convert(Objects.requireNonNull(this.ollamaChatClient.prompt(prompt).call().content()));
     }
 
     @Override
