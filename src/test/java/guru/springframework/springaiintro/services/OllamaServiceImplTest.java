@@ -13,7 +13,7 @@ class OllamaServiceImplTest {
 
     @Test
     void getAnswer() {
-        String answer = ollamaService.getAnswer("Tell me a dad joke");
+        String answer = ollamaService.getAnswer("how many 'r' are in the word strawberries?");
         System.out.println("Got the answer:");
         System.out.println(answer);
     }
