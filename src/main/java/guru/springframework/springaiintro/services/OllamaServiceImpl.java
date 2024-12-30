@@ -1,11 +1,16 @@
 package guru.springframework.springaiintro.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.springaiintro.model.Answer;
 import guru.springframework.springaiintro.model.GetCapitalRequest;
 import guru.springframework.springaiintro.model.Question;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -22,6 +27,9 @@ public class OllamaServiceImpl implements OllamaService {
     private Resource getCapitalPromptWithPrompt;
 
     private final ChatClient ollamaChatClient;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     public OllamaServiceImpl(ChatClient ollamaChatClient) {
         this.ollamaChatClient = ollamaChatClient;
@@ -55,7 +63,17 @@ public class OllamaServiceImpl implements OllamaService {
                 .call()
                 .content();
 
-        return new Answer(answer);
+        System.out.println(answer);
+
+        String responseString;
+        try {
+            JsonNode jsonNode = objectMapper.readTree(answer);
+            responseString = jsonNode.get("answer").asText();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return new Answer(responseString);
     }
 
     @Override
